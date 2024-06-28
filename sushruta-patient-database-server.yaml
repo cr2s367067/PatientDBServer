@@ -1,0 +1,42 @@
+services:
+  app:
+    build: .
+    working_dir: /patient-database-server #Path to the working directory
+    entrypoint:
+      - sleep
+      - infinity
+    image: sushruta-patient-database-server-dev-env # image name
+    init: true
+    ports:
+      - "8700:8700"
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: .
+        target: /patient-database-server/
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5434
+      DB_USER: patient-db-user
+      DB_PASSWORD: patientDBDevPsk
+      DB_NAME: patientDB
+
+  db:
+    image: postgres:latest
+    container_name: sushruta-patient-database-server-db
+    ports:
+      - "5434:5434"
+    environment:
+      POSTGRES_USER: patient-db-user
+      POSTGRES_PASSWORD: patientDBDevPsk
+      POSTGRES_DB: patientDB
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./dbconfig/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+
+volumes:
+  postgres-data:
